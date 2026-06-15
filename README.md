@@ -24,6 +24,15 @@ Make a ternary virtual machine that can:
 4. Boot a tiny kernel.
 5. Show a basic shell with commands like `help`, `regs`, `mem`, and `halt`.
 
+## Laptop target
+
+A real laptop will not run ternary instructions directly. The practical design is:
+
+1. Boot a small binary host layer.
+2. Start the balanced ternary VM.
+3. Boot the 3 Bit OS ternary kernel inside the VM.
+4. Use host services for screen, keyboard, storage, timers, and later hardware acceleration.
+
 ## Suggested milestones
 
 1. Create the ternary number library.
@@ -33,11 +42,28 @@ Make a ternary virtual machine that can:
 5. Build a simple kernel loop.
 6. Add a shell.
 7. Add file-like storage.
+8. Add a desktop runner.
+9. Add an x86_64 UEFI host.
+10. Add safe bootable QEMU and USB images.
 
 ## Design docs
 
-See `docs/balanced-ternary-os.md` for the main design direction.
+Start here:
+
+- `docs/balanced-ternary-os.md`
+- `docs/codex-build-plan.md`
+- `docs/codex-task-list.md`
+- `docs/codex-implementation-log.md`
+
+Versioned draft specs:
+
+- `docs/specs/isa-v0.md`
+- `docs/specs/hostabi-v0.md`
+- `docs/specs/kernel-image-v0.md`
+- `docs/specs/boot-modes.md`
 
 ## Notes for Codex
 
 Keep changes small and explain low-level choices. Prefer simple, readable code over clever code.
+
+Do not begin with GPU drivers, a destructive installer, networking, or POSIX compatibility. Build the ternary core and VM first.
