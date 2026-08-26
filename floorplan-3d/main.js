@@ -7,184 +7,18 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import { furnishHouse } from "./furniture.js";
+import { buildRooms } from "./layout.js";
 
 const WALL_H = 9;
 const WALL_T = 0.45;
 const FLOOR_Y = 0.05;
 
-/** @param {number} ft @param {number} [inch] */
-const f = (ft, inch = 0) => ft + inch / 12;
-
-const rooms = [
-  {
-    id: "primary",
-    name: "Primary Bedroom",
-    dim: "15'8\" × 12'10\"",
-    x: 0,
-    z: 0,
-    w: f(15, 8),
-    d: f(12, 10),
-    color: "#c4a484",
-  },
-  {
-    id: "bath-primary",
-    name: "Bath",
-    dim: "9'0\" × 4'9\"",
-    x: f(3, 2),
-    z: f(12, 10),
-    w: f(9, 0),
-    d: f(4, 9),
-    color: "#9bb7c9",
-  },
-  {
-    id: "bath-left",
-    name: "Bath",
-    dim: "12'6\" × 5'3\"",
-    x: f(3, 2),
-    z: f(12, 10) + f(4, 9),
-    w: f(12, 6),
-    d: f(5, 3),
-    color: "#8eafc0",
-  },
-  {
-    id: "bed-closet",
-    name: "Bedroom / Closet",
-    dim: "12'6\" × 9'0\"",
-    x: f(3, 2),
-    z: f(12, 10) + f(4, 9) + f(5, 3),
-    w: f(12, 6),
-    d: f(9, 0),
-    color: "#d2b48c",
-  },
-  {
-    id: "bed-nw",
-    name: "Bedroom",
-    dim: "12'6\" × 11'4\"",
-    x: f(3, 2),
-    z: f(12, 10) + f(4, 9) + f(5, 3) + f(9, 0),
-    w: f(12, 6),
-    d: f(11, 4),
-    color: "#c9a66b",
-  },
-  {
-    id: "hall",
-    name: "Hall",
-    dim: "5'8\" × 21'",
-    x: f(15, 8),
-    z: f(12, 10),
-    w: f(5, 8),
-    d: f(21, 0),
-    color: "#e8dfd0",
-  },
-  {
-    id: "living",
-    name: "Living Room",
-    dim: "21'11\" × 17'5\"",
-    x: f(15, 8) + f(5, 8),
-    z: 0,
-    w: f(21, 11),
-    d: f(17, 5),
-    color: "#d9cfc0",
-  },
-  {
-    id: "bed-small",
-    name: "Bedroom",
-    dim: "11'3\" × 7'3\"",
-    x: f(15, 8) + f(5, 8),
-    z: f(17, 5),
-    w: f(11, 3),
-    d: f(7, 3),
-    color: "#cbb892",
-  },
-  {
-    id: "family",
-    name: "Family Room",
-    dim: "26'6\" × 10'11\"",
-    x: f(15, 8) + f(5, 8) + f(11, 3),
-    z: f(17, 5) + f(7, 3) - f(10, 11),
-    w: f(26, 6),
-    d: f(10, 11),
-    color: "#cfc4b0",
-  },
-  {
-    id: "dining",
-    name: "Dining Area",
-    dim: "10'9\" × 11'2\"",
-    x: f(15, 8) + f(5, 8) + f(21, 11),
-    z: f(17, 5) - f(11, 2),
-    w: f(10, 9),
-    d: f(11, 2),
-    color: "#d4c3a8",
-  },
-  {
-    id: "kitchen",
-    name: "Kitchen",
-    dim: "10'7\" × 12'6\"",
-    x: f(15, 8) + f(5, 8) + f(21, 11),
-    z: 0,
-    w: f(10, 7),
-    d: f(12, 6),
-    color: "#b7c4a8",
-  },
-  {
-    id: "laundry",
-    name: "Laundry",
-    dim: "5'0\" × 16'0\"",
-    x: f(15, 8) + f(5, 8) + f(21, 11) + f(10, 9),
-    z: f(6, 11),
-    w: f(5, 0),
-    d: f(16, 0),
-    color: "#b0b8c0",
-  },
-  {
-    id: "bath-right",
-    name: "Bath",
-    dim: "5'8\" × 6'11\"",
-    x: f(15, 8) + f(5, 8) + f(21, 11) + f(10, 7),
-    z: 0,
-    w: f(5, 8),
-    d: f(6, 11),
-    color: "#9bb7c9",
-  },
-  {
-    id: "garage",
-    name: "Garage",
-    dim: "22'7\" × 23'6\"",
-    x: f(15, 8) + f(5, 8) + f(21, 11) + f(10, 9) + f(5, 0),
-    z: f(6, 11),
-    w: f(22, 7),
-    d: f(23, 6),
-    color: "#8a9096",
-  },
-  {
-    id: "room-se",
-    name: "Room",
-    dim: "11'4\" × 6'11\"",
-    x: f(15, 8) + f(5, 8) + f(21, 11) + f(10, 9) + f(5, 0) + (f(22, 7) - f(11, 4)),
-    z: 0,
-    w: f(11, 4),
-    d: f(6, 11),
-    color: "#c2b29a",
-  },
-];
-
-// Fix family room to sit at the north edge properly
+const rooms = buildRooms();
 const primary = rooms.find((r) => r.id === "primary");
-const bathPrimary = rooms.find((r) => r.id === "bath-primary");
-const bathLeft = rooms.find((r) => r.id === "bath-left");
-const bedCloset = rooms.find((r) => r.id === "bed-closet");
 const hall = rooms.find((r) => r.id === "hall");
 const bedNW = rooms.find((r) => r.id === "bed-nw");
 const bedSmall = rooms.find((r) => r.id === "bed-small");
 const family = rooms.find((r) => r.id === "family");
-const northEdge = bedNW.z + bedNW.d;
-family.z = northEdge - family.d;
-family.x = bedSmall.x;
-family.w = f(26, 6);
-// Small bedroom sits west of family, south of family's north strip
-bedSmall.z = family.z;
-bedSmall.d = Math.min(bedSmall.d, family.d);
-
 const living = rooms.find((r) => r.id === "living");
 const dining = rooms.find((r) => r.id === "dining");
 const kitchen = rooms.find((r) => r.id === "kitchen");
@@ -192,35 +26,6 @@ const laundry = rooms.find((r) => r.id === "laundry");
 const bathRight = rooms.find((r) => r.id === "bath-right");
 const garage = rooms.find((r) => r.id === "garage");
 const roomSE = rooms.find((r) => r.id === "room-se");
-
-// Align kitchen + dining east of living (open plan; dining north of kitchen)
-kitchen.x = living.x + living.w;
-kitchen.z = 0;
-kitchen.w = f(10, 7);
-kitchen.d = f(12, 6);
-dining.x = kitchen.x;
-dining.z = kitchen.z + kitchen.d;
-dining.w = f(10, 9);
-dining.d = f(11, 2);
-
-// Laundry / bath / garage column east of kitchen/dining
-const eastColX = Math.max(dining.x + dining.w, kitchen.x + kitchen.w);
-bathRight.x = eastColX;
-bathRight.z = 0;
-laundry.x = eastColX;
-laundry.z = bathRight.d;
-laundry.w = f(5, 0);
-laundry.d = northEdge - laundry.z;
-garage.x = eastColX + laundry.w;
-garage.z = bathRight.d;
-garage.w = f(22, 7);
-garage.d = northEdge - garage.z;
-roomSE.x = garage.x + garage.w - roomSE.w;
-roomSE.z = 0;
-roomSE.d = bathRight.d;
-
-// Expand family room to meet laundry/garage west edge if needed
-family.w = Math.max(family.w, eastColX + laundry.w - family.x);
 
 const houseBounds = (() => {
   let minX = Infinity,
@@ -301,9 +106,10 @@ function addPad(x, z, rx, rz, color) {
   mesh.receiveShadow = true;
   scene.add(mesh);
 }
-addPad(living.x + living.w * 0.35, -4.5, 18, 8, "#9aa39a");
-addPad(garage.x + garage.w * 0.5, garage.z - 4, garage.w * 0.9, 8, "#7d8388");
+addPad(living.x + living.w * 0.45, living.z - 4, 14, 7, "#9aa39a");
+addPad(garage.x + garage.w * 0.5, garage.z - 5, garage.w * 0.85, 9, "#7d8388");
 addPad(family.x + family.w * 0.45, family.z + family.d + 4, 22, 7, "#95a892");
+addPad(primary.x + primary.w * 0.5, primary.z - 3.5, primary.w * 0.9, 6, "#8fa88a");
 
 const house = new THREE.Group();
 scene.add(house);
@@ -400,61 +206,72 @@ function openingGlassZ(z0, z1, x, y, h, mat = glassMat) {
   house.add(mesh);
 }
 
-// Exterior outline walls with window / door cutouts (segmented)
+// Exterior outline walls — staggered south facade matches the plan
 const minX = houseBounds.minX;
 const maxX = houseBounds.maxX;
 const minZ = houseBounds.minZ;
 const maxZ = houseBounds.maxZ;
 
-// South wall (front) — living front door gap
-const frontDoorX = living.x + living.w * 0.42;
-wallX(minX, frontDoorX - 1.75, minZ, WALL_H, extWallMat);
-wallX(frontDoorX + 1.75, kitchen.x + kitchen.w, minZ, WALL_H, extWallMat);
-wallX(bathRight.x, roomSE.x, minZ, WALL_H, extWallMat);
-wallX(roomSE.x + roomSE.w, maxX, minZ, WALL_H, extWallMat);
-// Front door leaf
+// Primary south wall (southernmost)
+wallX(primary.x, primary.x + primary.w, primary.z, WALL_H, extWallMat);
+openingGlassX(primary.x + 3, primary.x + 10, primary.z - 0.05, 2.2, 4.2);
+
+// Recessed living south wall with front door
+const frontDoorX = living.x + living.w * 0.45;
+wallX(living.x, frontDoorX - 1.75, living.z, WALL_H, extWallMat);
+wallX(frontDoorX + 1.75, living.x + living.w, living.z, WALL_H, extWallMat);
 {
   const door = new THREE.Mesh(new THREE.BoxGeometry(3.2, 7.2, 0.18), doorMat);
-  door.position.set(frontDoorX, 3.6, minZ);
+  door.position.set(frontDoorX, 3.6, living.z);
   door.castShadow = true;
   house.add(door);
   const knob = new THREE.Mesh(
     new THREE.SphereGeometry(0.08, 12, 12),
     new THREE.MeshStandardMaterial({ color: "#c9a227", metalness: 0.8, roughness: 0.3 })
   );
-  knob.position.set(frontDoorX + 1.2, 3.4, minZ - 0.15);
+  knob.position.set(frontDoorX + 1.2, 3.4, living.z - 0.15);
   house.add(knob);
 }
+
+// Connecting walls of the front-door recess
+wallZ(primary.z, living.z, primary.x + primary.w, WALL_H, extWallMat);
+wallZ(primary.z, kitchen.z, kitchen.x, WALL_H, extWallMat);
+
+// Kitchen / bath / SE room south walls
+wallX(kitchen.x, kitchen.x + kitchen.w, kitchen.z, WALL_H, extWallMat);
+wallX(bathRight.x, bathRight.x + bathRight.w, bathRight.z, WALL_H, extWallMat);
+wallX(roomSE.x, roomSE.x + roomSE.w, roomSE.z, WALL_H, extWallMat);
+openingGlassX(kitchen.x + 2, kitchen.x + kitchen.w - 2, kitchen.z - 0.05, 2.2, 4.2);
+openingGlassX(roomSE.x + 2, roomSE.x + roomSE.w - 2, roomSE.z - 0.05, 2.2, 4.2);
 
 // North wall — sliding door in family room
 const slideX0 = family.x + family.w * 0.28;
 const slideX1 = family.x + family.w * 0.55;
-wallX(minX, bedNW.x, maxZ, WALL_H, extWallMat);
 wallX(bedNW.x, slideX0, maxZ, WALL_H, extWallMat);
 wallX(slideX1, maxX, maxZ, WALL_H, extWallMat);
 openingGlassX(slideX0, slideX1, maxZ, 0.2, 7.6, slidingMat);
-// Low sill under slider
 wallX(slideX0, slideX1, maxZ, 0.35, extWallMat);
+openingGlassX(bedNW.x + 2, bedNW.x + 8, maxZ + 0.05, 2.2, 4.2);
+openingGlassX(bedSmall.x + 2, bedSmall.x + bedSmall.w - 2, maxZ + 0.05, 2.2, 4.0);
 
-// West wall with bedroom windows
-wallZ(minZ, maxZ, minX, WALL_H, extWallMat);
+// West wall — primary jog, then inset upper wing
+wallZ(primary.z, primary.z + primary.d, primary.x, WALL_H, extWallMat);
+wallX(primary.x, bedNW.x, primary.z + primary.d, WALL_H, extWallMat); // jog face
+wallZ(primary.z + primary.d, maxZ, bedNW.x, WALL_H, extWallMat);
 [
   [primary.z + 2, primary.z + 6],
   [rooms.find((r) => r.id === "bed-closet").z + 2, rooms.find((r) => r.id === "bed-closet").z + 6],
   [bedNW.z + 2.5, bedNW.z + 7.5],
 ].forEach(([a, b]) => {
-  // punch visual window: overlay glass on exterior
-  openingGlassZ(a, b, minX - 0.05, 2.2, 4.2);
+  const xWall = a < primary.d ? primary.x : bedNW.x;
+  openingGlassZ(a, b, xWall - 0.05, 2.2, 4.2);
 });
 
-// East wall (garage)
-wallZ(minZ, maxZ, maxX, WALL_H, extWallMat);
-// Garage door opening on south of garage? actually driveway south of garage mid
+// East wall along garage + SE room
+wallZ(roomSE.z, maxZ, maxX, WALL_H, extWallMat);
 {
   const gx0 = garage.x + 3;
   const gx1 = garage.x + garage.w - 3;
-  // replace south garage wall section with door
-  // already have south wall for roomSE; add garage door on south face of garage slab
   const gDoor = new THREE.Mesh(
     new THREE.BoxGeometry(gx1 - gx0, 7.5, 0.2),
     new THREE.MeshStandardMaterial({ color: "#4a5560", roughness: 0.65 })
@@ -473,20 +290,27 @@ function addInteriorPartitions() {
     edges.push({ z0: r.z, z1: r.z + r.d, x: r.x + r.w, axis: "z" });
   }
 
-  // Deduplicate roughly and skip outer shell
   const seen = new Set();
   for (const e of edges) {
     if (e.axis === "x") {
-      if (Math.abs(e.z - minZ) < 0.1 || Math.abs(e.z - maxZ) < 0.1) continue;
+      // skip true exterior south/north spans already built
+      if (Math.abs(e.z - maxZ) < 0.1) continue;
+      if (Math.abs(e.z - primary.z) < 0.1 && e.x0 < primary.w) continue;
+      if (Math.abs(e.z - living.z) < 0.1 && e.x0 >= living.x - 0.1 && e.x1 <= living.x + living.w + 0.1) continue;
+      if (Math.abs(e.z - kitchen.z) < 0.1 && e.x0 >= kitchen.x - 0.1) continue;
       const key = `x:${e.x0.toFixed(2)}:${e.x1.toFixed(2)}:${e.z.toFixed(2)}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      // door gaps in key corridors
       const mid = (e.x0 + e.x1) / 2;
       const isHallDoor =
-        Math.abs(e.z - (living.z + living.d)) < 0.2 ||
-        Math.abs(e.z - hall.z) < 0.2 ||
+        Math.abs(e.z - (living.z + living.d)) < 0.25 ||
+        Math.abs(e.z - hall.z) < 0.25 ||
         (e.x0 < hall.x + 1 && e.x1 > hall.x);
+      // keep living↔family and living↔dining open
+      const openPlan =
+        (Math.abs(e.z - family.z) < 0.2 && e.x0 >= living.x) ||
+        (Math.abs(e.z - dining.z) < 0.2 && e.x0 >= dining.x - 0.2);
+      if (openPlan) continue;
       if (isHallDoor && e.x1 - e.x0 > 4) {
         wallX(e.x0, mid - 1.4, e.z, WALL_H, wallMat);
         wallX(mid + 1.4, e.x1, e.z, WALL_H, wallMat);
@@ -495,16 +319,18 @@ function addInteriorPartitions() {
       }
     } else {
       if (Math.abs(e.x - minX) < 0.1 || Math.abs(e.x - maxX) < 0.1) continue;
+      if (Math.abs(e.x - bedNW.x) < 0.1 && e.z0 >= primary.d) continue;
+      if (Math.abs(e.x - primary.x) < 0.1) continue;
       const key = `z:${e.z0.toFixed(2)}:${e.z1.toFixed(2)}:${e.x.toFixed(2)}`;
       if (seen.has(key)) continue;
       seen.add(key);
       const openLivingKitchen =
-        Math.abs(e.x - (living.x + living.w)) < 0.15 && e.z0 < living.d && e.z1 > 2;
+        Math.abs(e.x - (living.x + living.w)) < 0.2 && e.z0 < living.z + living.d && e.z1 > living.z;
       if (openLivingKitchen) {
-        // keep open-plan between living and kitchen/dining — partial pony wall only
-        wallZ(e.z0, e.z0 + 1.2, e.x, 3.2, wallMat);
-        wallZ(e.z1 - 1.2, e.z1, e.x, WALL_H, wallMat);
-      } else if (Math.abs(e.x - (hall.x + hall.w)) < 0.15 || Math.abs(e.x - hall.x) < 0.15) {
+        wallZ(e.z0, e.z0 + 1.0, e.x, 3.0, wallMat);
+        continue;
+      }
+      if (Math.abs(e.x - (hall.x + hall.w)) < 0.15 || Math.abs(e.x - hall.x) < 0.15) {
         const mid = (e.z0 + e.z1) / 2;
         wallZ(e.z0, mid - 1.5, e.x, WALL_H, wallMat);
         wallZ(mid + 1.5, e.z1, e.x, WALL_H, wallMat);
@@ -515,11 +341,6 @@ function addInteriorPartitions() {
   }
 }
 addInteriorPartitions();
-
-// More windows on south primary / room / north bedrooms
-openingGlassX(primary.x + 3, primary.x + 8, minZ - 0.05, 2.2, 4.2);
-openingGlassX(roomSE.x + 2, roomSE.x + roomSE.w - 2, minZ - 0.05, 2.2, 4.2);
-openingGlassX(bedNW.x + 2, bedNW.x + 8, maxZ + 0.05, 2.2, 4.2);
 
 // Full furnishings for every room
 const roomsById = Object.fromEntries(rooms.map((room) => [room.id, room]));
@@ -563,7 +384,7 @@ function addNote(text, x, y, z) {
   obj.position.set(x, y, z);
   labelGroup.add(obj);
 }
-addNote("Front Door", frontDoorX, 8.2, minZ - 1.2);
+addNote("Front Door", frontDoorX, 8.2, living.z - 1.2);
 addNote("Sliding Door", (slideX0 + slideX1) / 2, 8.2, maxZ + 1.2);
 
 // UI

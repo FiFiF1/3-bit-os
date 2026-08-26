@@ -490,24 +490,22 @@ export function furnishHouse(house, roomsById) {
   place(house, makePlant(), r.family.x + 2, 0, r.family.z + r.family.d - 1.8);
   place(house, makePlant(), r.family.x + r.family.w - 8, 0, r.family.z + r.family.d - 1.5);
 
-  // —— Dining ——
-  place(house, makeDiningSet({ seats: 6 }), cx(r.dining), 0, cz(r.dining));
+  // —— Kitchen + dining (island drawn on plan between living and dining) ——
+  place(house, makeDiningSet({ seats: 6 }), cx(r.dining) + 1.5, 0, cz(r.dining));
   place(house, makePlant(), r.dining.x + 1.3, 0, r.dining.z + r.dining.d - 1.3);
-
-  // —— Kitchen ——
-  place(house, makeKitchenIsland(), r.kitchen.x + r.kitchen.w * 0.42, 0, r.kitchen.z + r.kitchen.d * 0.55);
+  place(house, makeKitchenIsland(), r.living.x + r.living.w - 2.2, 0, cz(r.dining) - 1);
   for (let i = 0; i < 5; i++) {
     place(
       house,
       makeBarStool(),
-      r.kitchen.x + r.kitchen.w * 0.42 - 5.0,
+      r.living.x + r.living.w - 5.2,
       0,
-      r.kitchen.z + r.kitchen.d * 0.55 - 2.2 + i * 1.15
+      cz(r.dining) - 3.2 + i * 1.15
     );
   }
   place(
     house,
-    makeKitchenRun(Math.max(6, r.kitchen.d * 0.85)),
+    makeKitchenRun(Math.max(6, r.kitchen.d * 0.75)),
     r.kitchen.x + r.kitchen.w - 1.2,
     0,
     r.kitchen.z + r.kitchen.d * 0.5,
