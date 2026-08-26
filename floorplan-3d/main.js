@@ -169,6 +169,11 @@ const rooms = [
 ];
 
 // Fix family room to sit at the north edge properly
+const primary = rooms.find((r) => r.id === "primary");
+const bathPrimary = rooms.find((r) => r.id === "bath-primary");
+const bathLeft = rooms.find((r) => r.id === "bath-left");
+const bedCloset = rooms.find((r) => r.id === "bed-closet");
+const hall = rooms.find((r) => r.id === "hall");
 const bedNW = rooms.find((r) => r.id === "bed-nw");
 const bedSmall = rooms.find((r) => r.id === "bed-small");
 const family = rooms.find((r) => r.id === "family");
